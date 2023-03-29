@@ -1,0 +1,152 @@
+@extends('layouts.app')
+
+@section('content')
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1>YEAR OF RETIREMENT</h1>
+          </div>
+          <div class="col-sm-6 ">
+            <div style="float:right"> <a href="{{ route('demographics')}}"><button type="button" class="btn btn-warning btn-sm text-light"><< BACK</button></a></div>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="row">
+        <div class="col-12">
+          <div class="card">
+           
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"></h3>
+			  
+			  <div class="card-tools">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                    <i class="fas fa-minus"></i>
+                </button>
+                <div class="btn-group">
+                    
+                    <div class="dropdown-menu dropdown-menu-right" role="menu">
+                      <a href="#" class="dropdown-item">Action</a>
+                      <a href="#" class="dropdown-item">Another action</a>
+                      <a href="#" class="dropdown-item">Something else here</a>
+                      <a class="dropdown-divider"></a>
+                      <a href="#" class="dropdown-item">Separated link</a>
+                    </div>
+                  </div>
+                  <button type="button" class="btn btn-tool" data-card-widget="remove">
+                    <i class="fas fa-times"></i>
+                  </button>
+				</div>
+            </div>
+			
+            <!-- /.card-header -->
+            <div class="card-body">
+				@if ($message = Session::get('success'))
+					<div class="alert alert-success alert-dismissible fade show" role="alert">
+						{{ $message }}
+						<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+				@elseif($message = Session::get('error'))
+					<div class="alert alert-danger alert-dismissible fade show" role="alert">
+						{{ $message }}
+						<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+                @endif
+				
+        <div class="float-left my-2">Showing {{ $year_rcount }} entries</div>
+				
+				<div class="float-right  pb-1">
+            <form action="/download_demog_result_yr" method="POST" enctype="multipart/form-data" target="_blank">
+                @csrf
+                <button type="submit" class="btn btn-tool">
+                <i class="fa fa-download"></i> &nbsp;Download Excel
+                </button>
+                <a href="#" class="btn btn-tool">
+                    <i class="fa fa-download"></i> &nbsp;Downloa PDF</a>
+                </a>
+                <input type="text" name="office" value="{{ $office }}" hidden>
+                <input type="text" name="year_retirees" value="{{ $year_retirees }}" hidden>
+            </form>
+				</div>
+				
+        <div class="card-body table-responsive p-0" style="height: 600px;">
+				<table id="example1" class="table table-head-fixed text-nowrap text-center">
+                <thead>
+                  <tr>
+                    <th style="width:15%;">Item No.</th>
+                    <th style="width:15%;">Name</th>
+                    <th style="width:10%;">Unit\Office</th>
+                    <th style="width:10%;">Position</th>
+                    <th style="width:10%;">Salary Grade</th>
+                    <th style="width:15%">Date of Birth / Age</th>
+                    <th style="width:15%;">Compulsory Retirement</th>
+                    <th style="width:10%;">Optional Retirement</th>
+                  </tr>
+                </thead>
+                <tbody>
+					
+                  @forelse ($year_rb as $key=>$master)
+                  <tr>
+                    <td>{{ $master->item_number == "" ? 'N/A' : $master->item_number }}</td>
+                    <td><a href="{{ route('masters.show', $master->main_id) }}">{{ $master->complete_name == "" ? 'N/A' : $master->complete_name}}</a></td>
+                    <td>{{ $master->office == "" ? 'N/A' : $master->office}}</td>
+                    <td>{{ $master->position == null ? 'N/A' : $master->position }}</td>
+                    <td>{{ $master->salary_grade == null ? 'N/A' : $master->salary_grade }}</td>
+                    <td> @if($master->dob == null)
+                  
+                        @elseif($master->dob == '1970-01-01')
+                          
+                        @else
+                          {{ date('m/d/Y', strtotime($master->dob)) }}
+                        @endif 
+                        / 
+                        <?php
+                        $dateOfBirth = $master->dob;
+                        $today = date("Y-m-d");
+                        $diff = date_diff(date_create($dateOfBirth), date_create($today));
+                        $age = $diff->format('%y');
+
+                        echo $age.' yrs old';
+                        ?>
+                    </td>
+                    <td>{{ $master->retirement_date == null ? 'N/A' : date('d M Y',strtotime($master->retirement_date)) }}</td>
+                    <td>{{ $master->optional_retire == null ? 'N/A' : date('d M Y',strtotime($master->optional_retire)) }}</td>
+                    
+                  </tr>
+                  @empty
+                    <tr>
+                      <td colspan="8"><strong>Sorry</strong> There are no data available.</td>
+                    </tr>
+                  @endforelse
+                        </tbody>
+                </table>
+                </div>
+              
+               
+            </div>
+            <!-- /.card-body -->
+          </div>
+          <!-- /.card -->
+        </div>
+        <!-- /.col -->
+      </div>
+      <!-- /.row -->
+    </section>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
+
+@endsection
